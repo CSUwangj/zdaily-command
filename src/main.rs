@@ -128,7 +128,7 @@ Today I have done leetcode's [{month} LeetCoding Challenge]({url}) with `cpp`.
 
 ## Solution
 
-```
+``` cpp
 
 ```
 ", time = time, file_name = file_name, title = title, problem_title = problem_title, problem_description = problem_description, url = url);
