@@ -2,13 +2,24 @@
 use std::{fs, collections::HashMap};
 use chrono::{prelude::{Local, SecondsFormat}};
 use dotenv::dotenv;
-use log::debug;
+use log::info;
+use reqwest::Client;
 use structopt::StructOpt;
 
 mod opts;
 mod model;
 
 use crate::model::{DailyData, QuestionData};
+
+fn new_client() -> Client {
+    match std::env::var("HTTPS_PROXY") {
+        Ok(proxy) => reqwest::Client::builder()
+          .proxy(reqwest::Proxy::all(proxy).expect("Pass Proxy Failed"))
+          .build()
+          .expect("Client Build Failed."),
+        Err(_) => reqwest::Client::new()
+    }
+}
 
 async fn fetch_daily() -> DailyData {
     let mut map = HashMap::new();
@@ -22,10 +33,8 @@ async fn fetch_daily() -> DailyData {
   }
 }");
 
-    let client = reqwest::Client::builder()
-        .proxy(reqwest::Proxy::all("http://127.0.0.1:7890").expect("Pass Proxy Failed"))
-        .build()
-        .expect("Client Build Failed.");
+    
+    let client = new_client();
     let res = client.post("https://leetcode.com/graphql/")
         .json(&map)
         .send()
@@ -36,6 +45,7 @@ async fn fetch_daily() -> DailyData {
         .await
         .expect("Wrong Response for daily metadata.");
 }
+
 async fn fetch_question(title_slug: String) -> QuestionData {
     let mut map = HashMap::new();
     map.insert("query", format!("query questionData {{
@@ -44,16 +54,12 @@ async fn fetch_question(title_slug: String) -> QuestionData {
   }}
 }}", title_slug));
 
-    let client = reqwest::Client::builder()
-        .proxy(reqwest::Proxy::all("http://127.0.0.1:7890").expect("Pass Proxy Failed"))
-        .build()
-        .expect("Client Build Failed.");
+    let client = new_client();
     let res = client.post("https://leetcode.com/graphql/")
         .json(&map)
         .send()
         .await
         .expect("Fetch Failed.");
-    println!("!!!!!!!!!!!!{:?}", res);
     return res
         .json::<QuestionData>()
         .await
@@ -75,7 +81,7 @@ async fn main() {
     }
     pretty_env_logger::init();
 
-    debug!("{:?}", opt);
+    info!("{:?}", opt);
 
     let dir = match fs::try_exists(&opt.content_dir) {
         Ok(true) => opt.content_dir,
@@ -127,7 +133,7 @@ Today I have done leetcode's [{month} LeetCoding Challenge]({url}) with `cpp`.
 ```
 ", time = time, file_name = file_name, title = title, problem_title = problem_title, problem_description = problem_description, url = url);
 
-    println!("{}", document);
+    info!("{}", document);
 
     let folder_name = dir.join(format!("{}-Daily-Challenge", local.format("%Y-%m-%d")));
     let file_name = folder_name.join("index.md");

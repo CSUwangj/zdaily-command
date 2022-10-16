@@ -4,7 +4,7 @@ use structopt::StructOpt;
 #[derive(Debug, StructOpt)]
 #[structopt(
     name = "ZDaily New",
-    about = "Using for create new ZDaily with leetcode problem"
+    about = "Using for create new ZDaily with leetcode problem. Inherit HTTPS_PROXY."
 )]
 pub struct Opt {
     /// logging level by number of `v', default logging level is error,
