@@ -114,7 +114,7 @@ categories = [\"DailyChallenge\"]
 archives = [\"archive\"]
 +++
 
-Today I have done leetcode's [{month} LeetCoding Challenge]({url}) with `cpp`.
+Today I have done leetcode's [{month} LeetCoding Challenge](https://leetcode.com{url}) with `cpp`.
 
 <!-- more -->
 
